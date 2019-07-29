@@ -43,10 +43,12 @@ void Ping360Simulator::generateFakeData() {
         }
         deviceData.append(point);
     }
+    counter += 1;
     emit dataGenerated(deviceData);
 }
 
 void Ping1DSimulator::generateFakeData() {
+    static uint counter = 1;
     static const float numPoints = 200;
     static const float maxDepth = 70000;
     const float stop1 = numPoints / 2.0 - 10 * qSin(counter / 10.0);
@@ -66,6 +68,7 @@ void Ping1DSimulator::generateFakeData() {
         }
         data.append(point);
     }
+    counter += 1;
     emit dataGenerated(data);
 }
 
