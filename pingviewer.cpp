@@ -24,7 +24,6 @@
 void Ping360Simulator::generateFakeData() {
     static uint counter = 1;
     static const float numberOfSamples = 1200;
-    static const int angularResolution = 400;
 
     const float stop1 = numberOfSamples / 2.0 - 10 * qSin(counter / 10.0);
     const float stop2 = 3 * numberOfSamples / 5.0 + 6 * qCos(counter / 5.5);
@@ -50,7 +49,6 @@ void Ping360Simulator::generateFakeData() {
 void Ping1DSimulator::generateFakeData() {
     static uint counter = 1;
     static const float numPoints = 200;
-    static const float maxDepth = 70000;
     const float stop1 = numPoints / 2.0 - 10 * qSin(counter / 10.0);
     const float stop2 = 3 * numPoints / 5.0 + 6 * qCos(counter / 5.5);
 
