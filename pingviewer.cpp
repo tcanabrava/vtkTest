@@ -4,6 +4,7 @@
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
+#include <vtkCellData.h>
 
 #include <QtMath>
 #include <QTimer>
@@ -63,11 +64,40 @@ void Ping1DSimulator::generateFakeData() {
 
 PingViewer::PingViewer () {
 
+    auto resX = 200;
+    auto resY = 200;
+    planeSource->SetResolution(resX,resY);
     planeSource->SetCenter(1.0, 0.0, 0.0);
     planeSource->SetNormal(1.0, 0.0, 1.0);
     planeSource->Update();
 
+    newCellData = vtkFloatArray::New();
+    newCellData->SetNumberOfComponents(1);
+    newCellData->SetNumberOfValues(200 * 200);
+
+    // Create a lookup table to map cell data to colors
+    vtkNew<vtkLookupTable> lut;
+    auto tableSize = resX * resY + 1;
+    lut->SetNumberOfTableValues(tableSize);
+    lut->Build();
+
+    // Fill in a few known colors, the rest will be generated if needed
+    lut->SetTableValue(0     , 0     , 0     , 0, 1);  //Black
+    lut->SetTableValue(1, 0.8900, 0.8100, 0.3400, 1); // Banana
+    lut->SetTableValue(2, 1.0000, 0.3882, 0.2784, 1); // Tomato
+    lut->SetTableValue(3, 0.9608, 0.8706, 0.7020, 1); // Wheat
+    lut->SetTableValue(4, 0.9020, 0.9020, 0.9804, 1); // Lavender
+    lut->SetTableValue(5, 1.0000, 0.4900, 0.2500, 1); // Flesh
+    lut->SetTableValue(6, 0.5300, 0.1500, 0.3400, 1); // Raspberry
+    lut->SetTableValue(7, 0.9804, 0.5020, 0.4471, 1); // Salmon
+    lut->SetTableValue(8, 0.7400, 0.9900, 0.7900, 1); // Mint
+    lut->SetTableValue(9, 0.2000, 0.6300, 0.7900, 1); // Peacock
+
+    planeSource->Update();
+
     planeMapper->SetInputConnection(planeSource->GetOutputPort());
+    planeMapper->SetScalarRange(0, tableSize);
+    planeMapper->SetLookupTable(lut);
 
     planeActor->SetMapper(planeMapper);
     renderer->AddActor(planeActor);
@@ -97,5 +127,24 @@ void PingViewer::handleData(const QByteArray& data)
     Q_UNUSED(data);
     static double rotation = 0;
     rotation += 0.01;
+
+    // Horrible, but I did not managed to make the same cellData work.
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfComponents(1);
+    cellData->SetNumberOfValues(2000 * 2000);
+
+    for (vtkIdType i = 0, end = 200 * 200 - 200; i < end; i++) {
+        cellData->SetValue(i + 200, newCellData->GetValue(i));
+    }
+
+    for (vtkIdType i = 0, end = 200; i < end; i++)
+    {
+        cellData->SetValue(i, data[(int)i]);
+    }
+
+    planeSource->GetOutput()->GetCellData()->SetScalars(cellData);
     renderWindow->GetInteractor()->Render();
+
+    newCellData->Delete();
+    newCellData = cellData;
 }

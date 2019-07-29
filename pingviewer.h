@@ -62,6 +62,7 @@ private:
     vtkNew<vtkActor> planeActor;
     vtkNew<vtkColorSeries> colorSeries;
     vtkNew<vtkColorTransferFunction> colorTransferFunction;
+    vtkFloatArray* newCellData;
 
     // vtk callbacks
     vtkNew<PingVtkShowCommand> showCallback;
