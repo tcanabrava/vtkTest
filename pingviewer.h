@@ -12,9 +12,14 @@
 #include <vtkSphereSource.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
-
+#include <vtkLookupTable.h>
 #include <vtkCone.h>
 #include <vtkConeSource.h>
+#include <vtkImageData.h>
+#include <vtkPlaneSource.h>
+#include <vtkElevationFilter.h>
+#include <vtkColorSeries.h>
+#include <vtkColorTransferFunction.h>
 
 #include <QThread>
 
@@ -40,19 +45,31 @@ class PingViewer : public QVTKOpenGLNativeWidget {
     Q_OBJECT
 public:
     PingViewer();
-    ~PingViewer() override = default;
-    
+    ~PingViewer() override;
+    void handleData(const QByteArray& data);
+
+signals:
+    void startSimulation();
+
 private:
-    vtkNew<vtkNamedColors> colors;
+    // Window, rendereres and etc.
     vtkNew<vtkGenericOpenGLRenderWindow> renderWindow;
-    vtkNew<vtkSphereSource> sphereSource;
-    vtkNew<vtkPolyDataMapper> sphereMapper;
-    vtkNew<vtkActor> sphereActor;
     vtkNew<vtkRenderer> renderer;
-    vtkNew<vtkConeSource> coneSource;
-    vtkNew<vtkPolyDataMapper> coneMapper;
-    vtkNew<vtkActor> coneActor;
+
+    // Plane
+    vtkNew<vtkPlaneSource> planeSource;
+    vtkNew<vtkPolyDataMapper> planeMapper;
+    vtkNew<vtkActor> planeActor;
+    vtkNew<vtkColorSeries> colorSeries;
+    vtkNew<vtkColorTransferFunction> colorTransferFunction;
+
+    // vtk callbacks
     vtkNew<PingVtkShowCommand> showCallback;
 
+    // Qt
     QThread simulatorThread;
+
+    // internal
+    Ping1DSimulator *ping360Sim;
+
 };
